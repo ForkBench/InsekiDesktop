@@ -21,7 +21,7 @@ templ Nav(files []core.File) {
 		<ul class="folder-list">
 			<h1><a href="/">Main folders</a></h1>
 			for _, file := range files {
-				<li><img alt={ file.FileName } src={ "/static" + file.IconPath }/><a href={ `/query?filepath=${file.Path}` }>{ file.FileName }</a></li>
+				<li><img alt={ file.FileName } src={ "/static" + file.IconPath }/><a href={ templ.URL("/query?path=" + file.GetB64Path()) }>{ file.FileName }</a></li>
 			}
 		</ul>
 	</div>
@@ -71,7 +71,9 @@ templ Page(contents templ.Component, files []core.File) {
 		@Head()
 		<body>
 			@Nav(files)
-			@contents
+			<main>
+                @contents
+			</main>
 		</body>
 	</html>
 }

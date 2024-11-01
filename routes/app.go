@@ -2,14 +2,13 @@ package routes
 
 import (
 	"github.com/ForkBench/Inseki-Core/tools"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httplog/v2"
 	"inseki-desk/core"
 	"log/slog"
 	"net/http"
 	"os"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/httplog/v2"
 
 	"inseki-desk/pages"
 )
@@ -79,8 +78,34 @@ func NewChiRouter(configJson string) *chi.Mux {
 		w.WriteHeader(http.StatusOK)
 	})
 
+	r.Get("/query", func(w http.ResponseWriter, r *http.Request) {
+		// Get the path from the query
+		path := r.URL.Query().Get("path")
+
+		// Unb64 the path
+		file, err := core.FileFromUrl(path)
+		if err != nil {
+			// 400 Bad Request status
+			http.Error(w, "Invalid path", http.StatusBadRequest)
+			return
+		}
+
+		// List all subfiles
+		files := analyzer.ListAllSubFiles(file.Path)
+
+		HXRender(w, r, pages.QueryPage(file, files), mainFolders)
+
+		// 200 OK status
+		w.WriteHeader(http.StatusOK)
+	})
+
 	// Listen to port 3000.
-	go http.ListenAndServe(":9245", r)
+	go func() {
+		err := http.ListenAndServe(":9245", r)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	return r
 }

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"encoding/base64"
 	"github.com/ForkBench/Inseki-Core/tools"
 	"os"
 	"path/filepath"
@@ -16,6 +17,32 @@ type File struct {
 	Path     string
 	FileName string
 	IconPath string
+}
+
+func (f File) GetB64Path() string {
+	return B64Encode(f.Path)
+}
+
+func FileFromUrl(url string) (File, error) {
+	path, err := B64Decode(url)
+	if err != nil {
+		return File{}, err
+	}
+
+	// Check if the file exists
+	fileinfo, err := os.Stat(path)
+	if err != nil {
+		return File{}, err
+	}
+
+	iconPath := "/folder.png"
+
+	// Check if it's a directory
+	if !fileinfo.IsDir() {
+		iconPath = "/file.png"
+	}
+
+	return File{Path: path, FileName: filepath.Base(path), IconPath: iconPath}, nil
 }
 
 func (a Analyze) Process(path string) (error, []tools.Response) {
@@ -65,4 +92,17 @@ func (a Analyze) ListAllSubFiles(path string) []File {
 	}
 
 	return subFiles
+}
+
+func B64Encode(str string) string {
+	return base64.StdEncoding.EncodeToString([]byte(str))
+}
+
+func B64Decode(str string) (string, error) {
+	data, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
 }
