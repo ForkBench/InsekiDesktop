@@ -3,6 +3,7 @@ module inseki-desk
 go 1.22.4
 
 require (
+	github.com/ForkBench/Inseki-Core v0.0.0-20241030171019-0fd611d87845
 	github.com/a-h/templ v0.2.747
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/httplog/v2 v2.1.1

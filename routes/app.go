@@ -1,21 +1,48 @@
 package routes
 
 import (
+	"github.com/ForkBench/Inseki-Core/tools"
+	"inseki-desk/core"
 	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v2"
 
-	"inseki-desk/components"
 	"inseki-desk/pages"
 )
 
 /*
 Create a new chi router, configure it and return it.
 */
-func NewChiRouter() *chi.Mux {
+func NewChiRouter(configJson string) *chi.Mux {
+
+	err, config := tools.ReadEmbedConfigFile(configJson)
+	if err != nil {
+		panic(err)
+	}
+
+	// Check if the folder exists
+	err = tools.CheckIfConfigFolderExists(config)
+	if err != nil {
+		panic(err)
+	}
+
+	err, insekiIgnore := tools.ReadInsekiIgnore(config)
+	if err != nil {
+		panic(err)
+	}
+
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+
+	analyzer := core.Analyze{Config: config, InsekiIgnore: insekiIgnore, Home: homedir}
+
+	mainFolders := analyzer.GetMainFolders()
 
 	r := chi.NewRouter()
 
@@ -44,19 +71,9 @@ func NewChiRouter() *chi.Mux {
 	// Serve static files.
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	// Home page
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		// Render home page
-		HXRender(w, r, pages.HomePage())
 
-		// 200 OK status
-		w.WriteHeader(http.StatusOK)
-	})
-
-	// Hello page
-	r.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		// Render hello
-		HXRender(w, r, components.HelloWorld())
+		HXRender(w, r, pages.HomePage(), mainFolders)
 
 		// 200 OK status
 		w.WriteHeader(http.StatusOK)

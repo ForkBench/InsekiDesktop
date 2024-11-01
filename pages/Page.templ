@@ -1,5 +1,7 @@
 package pages
 
+import "inseki-desk/core"
+
 templ Head() {
 	<head>
 		<meta charset="utf-8"/>
@@ -7,16 +9,68 @@ templ Head() {
 		<title>AstroProject</title>
 		<link rel="stylesheet" href="/static/css/main.css"/>
 		<script src="https://unpkg.com/htmx.org"></script>
+		<link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap" rel="stylesheet"/>
 		// Todo : Change it to pack it with the app
 	</head>
 }
 
-templ Page(contents templ.Component) {
+templ Nav(files []core.File) {
+    <div class="left-container">
+		<ul class="folder-list">
+			<h1><a href="/">Main folders</a></h1>
+			for _, file := range files {
+				<li><img alt={ file.FileName } src={ "/static" + file.IconPath }/><a href={ `/query?filepath=${file.Path}` }>{ file.FileName }</a></li>
+			}
+		</ul>
+	</div>
+	<style>
+        .left-container {
+            width: 100%;
+            height: 100%;
+            background: #F5F3F4;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .folder-list {
+            margin-top: 20%;
+        }
+
+        li {
+            margin: 10px;
+            padding: 5px 14px;
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            background: #FFFFFF;
+            box-shadow: 0 0 5px 0 rgba(0,0,0,0.1);
+            border-radius: 9px;
+        }
+
+        li:hover {
+            background: #F5F3F4;
+        }
+
+        img {
+            width: 20px;
+            height: 20px;
+        }
+
+        h1 {
+            margin: 10px;
+            font-size: 1.5rem;
+        }
+    </style>
+}
+
+templ Page(contents templ.Component, files []core.File) {
 	<!DOCTYPE html>
 	<html>
 		@Head()
 		<body>
-			// @Nav(session) Your nav for example
+			@Nav(files)
 			@contents
 		</body>
 	</html>

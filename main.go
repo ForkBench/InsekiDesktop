@@ -13,9 +13,12 @@ import (
 //go:embed all:static
 var assets embed.FS
 
+//go:embed config.json
+var configJson string
+
 func main() {
 
-	r := routes.NewChiRouter()
+	r := routes.NewChiRouter(configJson)
 
 	// Create the application
 	app := application.New(application.Options{
