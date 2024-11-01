@@ -6,7 +6,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/mavolin/go-htmx"
 
-	"your_project_name/pages"
+	"inseki-desk/pages"
 )
 
 /*

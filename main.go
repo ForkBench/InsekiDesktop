@@ -7,7 +7,7 @@ import (
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
-	"your_project_name/routes"
+	"inseki-desk/routes"
 )
 
 //go:embed all:static
