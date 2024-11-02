@@ -13,7 +13,7 @@ body {
     font-style: normal;
 
     display: grid;
-    grid-template-columns: 3fr 7fr;
+    grid-template-columns: 30% 70%;
 }
 
 ul {

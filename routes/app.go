@@ -85,8 +85,13 @@ func NewChiRouter(configJson string) *chi.Mux {
 		// Unb64 the path
 		file, err := core.FileFromUrl(path)
 		if err != nil {
-			// 400 Bad Request status
-			http.Error(w, "Invalid path", http.StatusBadRequest)
+			HXRender(w, r, pages.PathNotFound(), mainFolders)
+			return
+		}
+
+		// Check if the file is a directory
+		if file.IconPath != "/folder.png" {
+			HXRender(w, r, pages.Reader(file), mainFolders)
 			return
 		}
 

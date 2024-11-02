@@ -1,0 +1,24 @@
+package pages
+
+import "inseki-desk/core"
+
+templ Reader(file core.File) {
+    <h1>Filename : {file.FileName}</h1>
+    <div class="file-content">
+        <pre>{file.ReadFile()}</pre>
+    </div>
+
+    <style>
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .file-content {
+            width: 80%;
+            margin: 20px;
+            padding: 20px;
+            overflow: scroll;
+        }
+    </style>
+}

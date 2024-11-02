@@ -3,13 +3,27 @@ package pages
 import "inseki-desk/core"
 
 templ QueryPage(file core.File, subFiles []core.File) {
+    <nav>
+        // Show
+    </nav>
     <ul class="right-container">
         <h1><a href={templ.URL(file.Path)}>{ file.FileName }</a></h1>
         for _, file := range subFiles {
-            <li class="file">
+            <li class={file.FileType()}>
                 <img alt={ file.FileName } src={ "/static" + file.IconPath }/>
                 <a href={ templ.URL("/query?path=" + file.GetB64Path()) }>{ file.FileName }</a>
             </li>
         }
     </ul>
+
+    <style>
+        .directory {
+            background: #e9ecef;
+            font-style: italic;
+        }
+    </style>
+}
+
+templ PathNotFound() {
+    <h1>Path not found</h1>
 }

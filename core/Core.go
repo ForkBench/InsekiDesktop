@@ -106,3 +106,33 @@ func B64Decode(str string) (string, error) {
 
 	return string(data), nil
 }
+
+func ReadFile(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func (f File) ReadFile() string {
+	content, err := ReadFile(f.Path)
+	if err != nil {
+		return ""
+	}
+
+	return content
+}
+
+func (f File) IsDirectory() bool {
+	return f.IconPath == "/folder.png"
+}
+
+func (f File) FileType() string {
+	if f.IsDirectory() {
+		return "directory"
+	}
+
+	return "file"
+}
