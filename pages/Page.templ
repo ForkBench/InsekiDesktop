@@ -79,39 +79,28 @@ templ Nav(files []core.File) {
         main {
             width: 100%;
         }
-        .skeleton {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 1rem 0;
-        }
-
-        .skeleton-line {
-            background-color: #e0e0e0;
-            height: 20px;
-            margin: 0.5rem 0;
-            border-radius: 4px;
-            animation: pulse 1.5s infinite;
-            width: 70%;
-        }
-
-        .skeleton-line.short {
-            width: 50%;
-        }
-
-
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-            100% {
-                opacity: 1;
-            }
-        }
     </style>
+}
+
+templ Script() {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const applyAnimationDelays = () => {
+                // Apply animation delays to the list items
+                document.querySelectorAll('.decale li').forEach((li, index) => {
+                    li.style.animationDelay = `${index * 0.03}s`;
+                });
+            };
+
+            applyAnimationDelays();
+
+            // When a new element is added to the DOM, apply the animation delays again
+            document.body.addEventListener('htmx:afterSwap', (event) => {
+                applyAnimationDelays();
+            });
+        });
+
+    </script>
 }
 
 templ Page(contents templ.Component, files []core.File) {
@@ -124,5 +113,6 @@ templ Page(contents templ.Component, files []core.File) {
                 @contents
 			</main>
 		</body>
+		@Script()
 	</html>
 }
