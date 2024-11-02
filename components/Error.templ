@@ -1,0 +1,18 @@
+package components
+
+templ ErrorMsg(err error) {
+    <div class="error">
+        <h1>Error</h1>
+        <pre>{ err.Error() }</pre>
+    </div>
+
+    <style>
+        .error {
+            margin: 1rem 0;
+            padding: 1rem;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 0.25rem;
+        }
+    </style>
+}

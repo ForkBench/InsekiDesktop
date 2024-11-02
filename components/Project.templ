@@ -1,0 +1,14 @@
+package components
+
+import "inseki-desk/core"
+
+templ Projects(projects []core.File) {
+    <div class="projects">
+        <h1>Projects</h1>
+        <ul>
+            for _, project := range projects {
+                <li><a href={ templ.URL("/query?path=" + project.GetB64Path()) }>{ project.FileName }</a></li>
+            }
+        </ul>
+    </div>
+}

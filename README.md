@@ -90,7 +90,7 @@ wails3 build
 To run it, execute the following command:
 
 ```
-  ./bin/inseki-desktop
+  ./bin/Inseki-Desktop
 ```
 
 [//]: # (You'll have to put structures into `~/.inseki` directory to see the results.)

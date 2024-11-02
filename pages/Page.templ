@@ -16,6 +16,8 @@ templ Head() {
 	</head>
 }
 
+
+
 templ Nav(files []core.File) {
     <div class="left-container">
 		<ul class="folder-list">
@@ -24,6 +26,17 @@ templ Nav(files []core.File) {
 				<li><img alt={ file.FileName } src={ "/static" + file.IconPath }/><a href={ templ.URL("/query?path=" + file.GetB64Path()) }>{ file.FileName }</a></li>
 			}
 		</ul>
+
+	    <div id="content" hx-get="/load-content" hx-trigger="load" hx-target="#content">
+            <div class="skeleton">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line"></div>
+            </div>
+        </div>
 	</div>
 	<style>
         .left-container {
@@ -65,6 +78,38 @@ templ Nav(files []core.File) {
 
         main {
             width: 100%;
+        }
+        .skeleton {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .skeleton-line {
+            background-color: #e0e0e0;
+            height: 20px;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            animation: pulse 1.5s infinite;
+            width: 70%;
+        }
+
+        .skeleton-line.short {
+            width: 50%;
+        }
+
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
         }
     </style>
 }

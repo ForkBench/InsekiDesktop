@@ -5,12 +5,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v2"
+	"inseki-desk/components"
 	"inseki-desk/core"
+	"inseki-desk/pages"
 	"log/slog"
 	"net/http"
 	"os"
-
-	"inseki-desk/pages"
+	"path/filepath"
 )
 
 /*
@@ -56,16 +57,14 @@ func NewChiRouter(configJson string) *chi.Mux {
 	r.Use(httplog.RequestLogger(logger))
 	r.Use(middleware.Recoverer)
 
-	/*
-		// ULTRA IMPORTANT : This middleware is used to prevent caching of the pages.
-		// Sometimes, HX requests may be cached by the browser, which may cause unexpected behavior.
-		r.Use(func(next http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("Cache-Control", "no-store")
-				next.ServeHTTP(w, r)
-			})
+	// ULTRA IMPORTANT : This middleware is used to prevent caching of the pages.
+	// Sometimes, HX requests may be cached by the browser, which may cause unexpected behavior.
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Cache-Control", "no-store")
+			next.ServeHTTP(w, r)
 		})
-	*/
+	})
 
 	// Serve static files.
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -86,12 +85,14 @@ func NewChiRouter(configJson string) *chi.Mux {
 		file, err := core.FileFromUrl(path)
 		if err != nil {
 			HXRender(w, r, pages.PathNotFound(), mainFolders)
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
 		// Check if the file is a directory
 		if file.IconPath != "/folder.png" {
 			HXRender(w, r, pages.Reader(file), mainFolders)
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 
@@ -99,6 +100,32 @@ func NewChiRouter(configJson string) *chi.Mux {
 		files := analyzer.ListAllSubFiles(file.Path)
 
 		HXRender(w, r, pages.QueryPage(file, files), mainFolders)
+
+		// 200 OK status
+		w.WriteHeader(http.StatusOK)
+	})
+
+	r.Get("/load-content", func(w http.ResponseWriter, r *http.Request) {
+
+		// TODO: Make it customizable
+		err, responses := analyzer.Process("~/Documents/")
+		if err != nil {
+			HXRender(w, r, components.ErrorMsg(err), mainFolders)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		projects := make([]core.File, 0)
+
+		for _, response := range responses {
+			projects = append(projects, core.File{
+				FileName: filepath.Base(response.Filepath),
+				Path:     response.Filepath,
+			})
+			println(response.Filepath)
+		}
+
+		HXRender(w, r, components.Projects(projects), mainFolders)
 
 		// 200 OK status
 		w.WriteHeader(http.StatusOK)
