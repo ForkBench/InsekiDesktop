@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/httplog/v2 v2.1.1
 	github.com/mavolin/go-htmx v1.0.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/wailsapp/wails/v3 v3.0.0-alpha.0
 )
 

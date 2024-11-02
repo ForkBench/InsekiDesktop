@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v2"
+	"github.com/patrickmn/go-cache"
 	"inseki-desk/components"
 	"inseki-desk/core"
 	"inseki-desk/pages"
@@ -12,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 /*
@@ -57,14 +59,16 @@ func NewChiRouter(configJson string) *chi.Mux {
 	r.Use(httplog.RequestLogger(logger))
 	r.Use(middleware.Recoverer)
 
-	// ULTRA IMPORTANT : This middleware is used to prevent caching of the pages.
-	// Sometimes, HX requests may be cached by the browser, which may cause unexpected behavior.
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Cache-Control", "no-store")
-			next.ServeHTTP(w, r)
-		})
-	})
+	//// ULTRA IMPORTANT : This middleware is used to prevent caching of the pages.
+	//// Sometimes, HX requests may be cached by the browser, which may cause unexpected behavior.
+	//r.Use(func(next http.Handler) http.Handler {
+	//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	//		w.Header().Set("Cache-Control", "no-store")
+	//		next.ServeHTTP(w, r)
+	//	})
+	//})
+
+	cache := cache.New(5*time.Minute, 10*time.Minute)
 
 	// Serve static files.
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -78,6 +82,7 @@ func NewChiRouter(configJson string) *chi.Mux {
 	})
 
 	r.Get("/query", func(w http.ResponseWriter, r *http.Request) {
+
 		// Get the path from the query
 		path := r.URL.Query().Get("path")
 
@@ -105,10 +110,19 @@ func NewChiRouter(configJson string) *chi.Mux {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	r.Get("/load-content", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/load-projects", func(w http.ResponseWriter, r *http.Request) {
+
+		projectsI, _ := cache.Get("projects")
+
+		if projectsI != nil {
+			projects := projectsI.([]core.File)
+			HXRender(w, r, components.Projects(projects), mainFolders)
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 
 		// TODO: Make it customizable
-		err, responses := analyzer.Process("~/Documents/")
+		err, responses := analyzer.Process("~/")
 		if err != nil {
 			HXRender(w, r, components.ErrorMsg(err), mainFolders)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -122,8 +136,10 @@ func NewChiRouter(configJson string) *chi.Mux {
 				FileName: filepath.Base(response.Filepath),
 				Path:     response.Filepath,
 			})
-			println(response.Filepath)
 		}
+
+		// Add to cache (chi)
+		cache.Set("projects", projects, 10*time.Minute)
 
 		HXRender(w, r, components.Projects(projects), mainFolders)
 
