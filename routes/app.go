@@ -9,6 +9,7 @@ import (
 	"inseki-desk/components"
 	"inseki-desk/core"
 	"inseki-desk/pages"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -115,14 +116,15 @@ func NewChiRouter(configJson string) *chi.Mux {
 		projectsI, _ := cache.Get("projects")
 
 		if projectsI != nil {
+			log.Println("Projects loaded from cache", len(projectsI.([]core.File)))
 			projects := projectsI.([]core.File)
-			HXRender(w, r, components.Projects(projects), mainFolders)
+			HXRender(w, r, components.Projects(projects, false), mainFolders)
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 
 		// TODO: Make it customizable
-		err, responses := analyzer.Process("~/")
+		err, responses := analyzer.Process("~/Documents/")
 		if err != nil {
 			HXRender(w, r, components.ErrorMsg(err), mainFolders)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -133,15 +135,15 @@ func NewChiRouter(configJson string) *chi.Mux {
 
 		for _, response := range responses {
 			projects = append(projects, core.File{
-				FileName: filepath.Base(response.Filepath),
-				Path:     response.Filepath,
+				FileName: filepath.Base(response.Root),
+				Path:     response.Root,
 			})
 		}
 
 		// Add to cache (chi)
 		cache.Set("projects", projects, 10*time.Minute)
 
-		HXRender(w, r, components.Projects(projects), mainFolders)
+		HXRender(w, r, components.Projects(projects, true), mainFolders)
 
 		// 200 OK status
 		w.WriteHeader(http.StatusOK)

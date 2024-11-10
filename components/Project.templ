@@ -2,7 +2,11 @@ package components
 
 import "inseki-desk/core"
 
-templ Projects(projects []core.File) {
+templ Projects(projects []core.File, isAnimated bool) {
+    if isAnimated {
+        @Script()
+    }
+
     <div class="projects">
         <h1>Projects</h1>
         <ul class="decale">
@@ -11,4 +15,25 @@ templ Projects(projects []core.File) {
             }
         </ul>
     </div>
+}
+
+templ Script() {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const applyAnimationDelays = () => {
+                // Apply animation delays to the list items
+                document.querySelectorAll('.decale li').forEach((li, index) => {
+                    li.style.animationDelay = `${index * 0.1}s`;
+                });
+            };
+
+            applyAnimationDelays();
+
+            // When a new element is added to the DOM, apply the animation delays again
+            document.body.addEventListener('htmx:afterSwap', (event) => {
+                applyAnimationDelays();
+            });
+        });
+
+    </script>
 }

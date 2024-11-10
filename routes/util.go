@@ -24,5 +24,8 @@ func HXRender(w http.ResponseWriter, r *http.Request, component templ.Component,
 
 	// Render the component.
 	w.Header().Set("Content-Type", "text/html")
-	component.Render(r.Context(), w)
+	err := component.Render(r.Context(), w)
+	if err != nil {
+		return
+	}
 }
